@@ -17,6 +17,7 @@ gif.src = "https://media.giphy.com/media/3o7abldj0b3rxrZUxW/giphy.gif";
 
 let started = false;
 let lastMoveAt = 0;
+let autoMoveInterval = null;
 
 function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
 
@@ -34,24 +35,56 @@ function moveNoButton() {
 
   noBtn.style.left = `${clamp(x, 0, rect.width - btnW)}px`;
   noBtn.style.top  = `${clamp(y, 0, rect.height - btnH)}px`;
+  noBtn.style.transform = 'translateY(-50%)';
 }
 
-// Start "run away" on first mouse move inside card
+function startAutoMove() {
+  if (autoMoveInterval) return; // Already started
+  
+  started = true;
+  hint.textContent = "Uh oh… 'No' is getting nervous 😅";
+  
+  // Move 3 times per second = every ~333ms
+  autoMoveInterval = setInterval(() => {
+    moveNoButton();
+  }, 333);
+}
+
+// Start auto-moving after 1 second
+setTimeout(() => {
+  startAutoMove();
+}, 1000);
+
+// Desktop: Start "run away" on first mouse move inside card
 document.querySelector(".card").addEventListener("mousemove", () => {
   if (!started) {
-    started = true;
-    hint.textContent = "Uh oh… 'No' is getting nervous 😅";
+    startAutoMove();
   }
   moveNoButton();
 });
 
-// Escape when trying to hover the "No" button
+// Desktop: Escape when trying to hover the "No" button
 noBtn.addEventListener("mouseenter", moveNoButton);
 noBtn.addEventListener("mouseover", moveNoButton);
 
-// If clicked (mobile might manage), keep it playful
-noBtn.addEventListener("click", () => {
+// Mobile & Desktop: If touched/clicked, keep it playful
+noBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
   hint.textContent = "Nice try 😈 but I'm not accepting that answer!";
+  moveNoButton();
+});
+
+// Mobile: Handle touch events
+noBtn.addEventListener("touchstart", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  hint.textContent = "Nice try 😈 but I'm not accepting that answer!";
+  moveNoButton();
+});
+
+noBtn.addEventListener("touchmove", (e) => {
+  e.preventDefault();
   moveNoButton();
 });
 
@@ -65,6 +98,21 @@ againBtn.addEventListener("click", () => {
   overlay.classList.add("hidden");
   hint.textContent = "\"No\" seems a bit shy today 😈";
   started = false;
-  noBtn.style.left = "280px";
-  noBtn.style.top = "10px";
+  
+  // Clear auto-move interval
+  if (autoMoveInterval) {
+    clearInterval(autoMoveInterval);
+    autoMoveInterval = null;
+  }
+  
+  // Reset button position
+  const isMobile = window.innerWidth <= 480;
+  noBtn.style.left = isMobile ? "calc(50% + 50px)" : "calc(50% + 70px)";
+  noBtn.style.top = "50%";
+  noBtn.style.transform = "translateY(-50%)";
+  
+  // Restart auto-move after 1 second
+  setTimeout(() => {
+    startAutoMove();
+  }, 1000);
 });
