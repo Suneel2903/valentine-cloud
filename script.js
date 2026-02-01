@@ -10,7 +10,7 @@ const arena = document.getElementById("arena");
 
 // ===== CUSTOMIZE HERE (edit these two lines only) =====
 question.textContent = "Want to be my Sunday morning snack? 😈";
-successText.textContent = "I'll eat you nice";
+successText.textContent = "I'll eat you nice 😈👅";
 // Choose any GIF URL you like:
 gif.src = "https://media.giphy.com/media/3o7abldj0b3rxrZUxW/giphy.gif";
 // ======================================================
